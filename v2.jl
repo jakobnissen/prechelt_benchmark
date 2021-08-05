@@ -71,12 +71,19 @@ function printTranslations(io, num, digits, dict, start=1, words=String[])
         n = n * 10 + nthDigit(digits, i)
         for word in get(dict, n, emptyStrings)
             foundWord = true
-            printTranslations(io, num, digits, dict, i + 1, [words; word])
+            push!(words, word)
+            printTranslations(io, num, digits, dict, i + 1, words)
+            pop!(words)
         end
     end
-    if !foundWord &&
-        !(!isempty(words) && ncodeunits(words[end]) == 1 && isdigit(words[end][begin]))
-        printTranslations(io, num, digits, dict, start + 1, [words; string(nthDigit(digits, start))])
+    if (
+        !foundWord &&
+        !(!isempty(words) &&
+        ncodeunits(words[end]) == 1 &&
+        isdigit(words[end][begin]))
+    )
+        words2 = push!(copy(words), string(nthDigit(digits, start)))
+        printTranslations(io, num, digits, dict, start + 1, words2)
     end
 end
 
@@ -103,6 +110,10 @@ function validate()
     v = take!(buf)
     v2 = open(read, "/tmp/res.txt")
     return v == v2
+end
+
+function time()
+    main(IOBuffer(), "../prechelt-phone-number-encoding/dictionary.txt", "../prechelt-phone-number-encoding/input.txt")
 end
 
 end # module

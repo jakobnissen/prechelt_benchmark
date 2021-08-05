@@ -5,11 +5,13 @@
 # - Author: Renato Athaydes
 # - Date: 2021-07-24
 =#
+module t1
+
 const emptyStrings = String[]
 
-function printTranslations(num, digits, ref, start=1, words=String[])
+function printTranslations(io, num, digits, ref, start=1, words=String[])
     if start > length(digits)
-       return println(num, ": ", join(words, " "))
+       return println(io, num, ": ", join(words, " "))
     end
     foundWord = false
     n = BigInt(1)
@@ -17,12 +19,12 @@ function printTranslations(num, digits, ref, start=1, words=String[])
         n = n * 10 + nthDigit(digits, i)
         for word in get(ref[], n, emptyStrings)
             foundWord = true
-            printTranslations(num, digits, ref, i + 1, [words; word])
+            printTranslations(io, num, digits, ref, i + 1, [words; word])
         end
     end
     if !foundWord &&
         !(!isempty(words) && length(words[end]) == 1 && isdigit(words[end][begin]))
-        printTranslations(num, digits, ref, start + 1, [words; string(nthDigit(digits, start))])
+        printTranslations(io, num, digits, ref, start + 1, [words; string(nthDigit(digits, start))])
     end
 end
 
@@ -63,8 +65,8 @@ function wordToNumber(word::String)::BigInt
     n
 end
 
-function main()
-    dict = open(isempty(ARGS) ? "dictionary.txt" : ARGS[begin]) do file
+function main(io::IO, p1, p2)
+    dict = open(p1) do file
         loadDictionary(file)
     end
 
@@ -72,10 +74,15 @@ function main()
     # in global scope, like the original version did.
     ref = Base.RefValue{Any}(dict)
 
-    open(length(ARGS) < 2 ? "input.txt" : ARGS[begin+1]) do file
+    open(p2) do file
         for num in eachline(file)
-            printTranslations(num, filter(isdigit, num), ref)
+            printTranslations(io, num, filter(isdigit, num), ref)
         end
     end
 end
 
+function time()
+    main(IOBuffer(), "../prechelt-phone-number-encoding/dictionary.txt", "../prechelt-phone-number-encoding/input.txt")
+end
+
+end # module
