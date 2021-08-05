@@ -58,10 +58,15 @@ end
 
 function printTranslations(io, num, digits, dict, start=1, words=String[])
     if start > ncodeunits(digits)
-       return println(io, num, ": ", join(words, " "))
+        print(io, num, ": ")
+        for word in words
+            print(io, word, ' ')
+        end
+        print(io, '\n')
+        return nothing
     end
     foundWord = false
-    n = BigInt(1)
+    n = UInt256(1)
     for i in start:ncodeunits(digits)
         n = n * 10 + nthDigit(digits, i)
         for word in get(dict, n, emptyStrings)
@@ -90,6 +95,14 @@ function main(io::IO, p1, p2)
             printTranslations(io, num, filter(isdigit, num), d)
         end
     end
+end
+
+function validate()
+    buf = IOBuffer()
+    @time main(buf, "../prechelt-phone-number-encoding/dictionary.txt", "../prechelt-phone-number-encoding/input.txt")
+    v = take!(buf)
+    v2 = open(read, "/tmp/res.txt")
+    return v == v2
 end
 
 end # module
