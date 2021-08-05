@@ -32,10 +32,18 @@ const DIGIT_LUT = let
     Tuple(arr)
 end
 
-function loadDictionary(file)::Dict{UInt256, Vector{String}}
-    dict = sizehint!(Dict{UInt256, Vector{String}}(), 1000)
+function loadDictionary(file)
+    dict = sizehint!(Dict{UInt256, Union{Tuple{String}, Vector{String}}}(), 1000)
     for word in eachline(file)
-        push!(get!(dict, word_to_number(word)) do; String[] end, word)
+        num = word_to_number(word)
+        existing = get(dict, num, nothing)
+        if existing === nothing
+            dict[num] = (word,)
+        elseif existing isa Tuple
+            dict[num] = push!([existing[1]], word)
+        else
+            push!(existing, word)
+        end
     end
     dict
 end
