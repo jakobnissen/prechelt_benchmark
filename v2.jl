@@ -67,8 +67,9 @@ end
 function printTranslations(io, num, digits, dict, start=1, words=String[])
     if start > ncodeunits(digits)
         print(io, num, ": ")
-        for word in words
-            print(io, word, ' ')
+        for (i, word) in enumerate(words)
+            print(io, word)
+            i == length(words) || print(io, ' ')
         end
         print(io, '\n')
         return nothing
